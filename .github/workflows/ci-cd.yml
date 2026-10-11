@@ -30,3 +30,12 @@ jobs:
 
       - name: Build Docker image
         run: docker build -t cloudpulse:${{ github.sha }} .
+
+      - name: Trigger Render deployment
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          test -n "$RENDER_DEPLOY_HOOK"
+          curl --fail --silent --show-error \
+            --request POST "$RENDER_DEPLOY_HOOK"
